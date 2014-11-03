@@ -13,15 +13,29 @@ public class Comber {
 		size=n;
 		number = new BitSet(n);
 	}
+	
+	public String getSmStatusFromBitSet(BitSet combination){
+		StringBuilder result = new StringBuilder();
+		result.append("Затр:");
+		for (int i=0;i<size;i++)
+		{
+			result.append(i+"-");
+			if (combination.get(i))result.append("1;");
+			else result.append("0;");
+		}
+		return result.toString();
+	}
+	
 	public BitSet[] getCoombs(){
-		int sizeOfResult = (int) Math.pow(2,size)-1;
+		if (size==0)return new BitSet[]{new BitSet()};
+		int sizeOfResult = (int) Math.pow(2,size);
 		BitSet[] result = new BitSet[sizeOfResult];
 		for (int i=0;i<sizeOfResult;i++)
 			result[i] = new BitSet(size);
 		
 		boolean active = true;
 		int iCount = 0;
-		int coombNumber=0;
+		int coombNumber=1;
 		int i=0;
 		while (active){
 			if		(number.get(i))	{

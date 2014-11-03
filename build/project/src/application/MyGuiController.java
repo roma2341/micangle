@@ -5,14 +5,15 @@ import java.util.ResourceBundle;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 
 public class MyGuiController implements Initializable{
@@ -26,10 +27,20 @@ public class MyGuiController implements Initializable{
 	private		MenuItem open ;
 	@FXML	
 	private		MenuItem undo ;
+	@FXML
+	private NumberAxis signalsChartXAxis;
 	@FXML		
 	private Button button_process;
+	public NumberAxis getSignalsChartXAxis() {
+		return signalsChartXAxis;
+	}
 	public Button getButton_process() {
 		return button_process;
+	}
+	@FXML
+	private LineChart<Number,Number> signalsChart;
+	public LineChart getSignalsChart() {
+		return signalsChart;
 	}
 	@FXML		
 	private TextArea textarea_input;
@@ -37,7 +48,21 @@ public class MyGuiController implements Initializable{
 	private TextArea textarea_output;
 	@FXML
 	private AnchorPane rootLayout;
-	
+	@FXML
+	private TextField textfield_minChartX;
+	public TextField getTextfield_minChartX() {
+		return textfield_minChartX;
+	}
+	public TextField getTextfield_maxChartX() {
+		return textfield_maxChartX;
+	}
+	public CheckBox getCheckbox_chartAutoranging() {
+		return checkbox_chartAutoranging;
+	}
+	@FXML
+	private TextField textfield_maxChartX;
+	@FXML
+	private CheckBox checkbox_chartAutoranging;
 
 	public MenuBar getMenuBar() {
 		return menuBar;

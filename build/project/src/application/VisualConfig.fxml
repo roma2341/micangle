@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.image.*?>
@@ -22,10 +24,31 @@
           </Menu>
         </menus>
       </MenuBar>
-      <VBox layoutY="29.0" prefHeight="454.0" prefWidth="640.0">
+      <VBox layoutY="29.0" prefHeight="454.0" prefWidth="640.0" AnchorPane.bottomAnchor="-3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="29.0">
          <children>
-            <TextArea fx:id="textarea_input" prefHeight="149.0" prefWidth="640.0" />
-            <TextArea fx:id="textarea_output" prefHeight="200.0" prefWidth="200.0" />
+            <LineChart fx:id="signalsChart" animated="false" createSymbols="false">
+              <xAxis>
+                <NumberAxis fx:id="signalsChartXAxis" side="BOTTOM" upperBound="10.0" />
+              </xAxis>
+              <yAxis>
+                <NumberAxis side="LEFT" upperBound="10.0" />
+              </yAxis>
+            </LineChart>
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Min" />
+                  <TextField fx:id="textfield_minChartX" />
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Max" />
+                  <TextField fx:id="textfield_maxChartX" />
+                  <CheckBox fx:id="checkbox_chartAutoranging" mnemonicParsing="false" text="Автограниця" />
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <TextArea fx:id="textarea_input" />
+                  <TextArea fx:id="textarea_output" />
+               </children>
+            </HBox>
             <Button fx:id="button_process" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="Обрахунки" />
          </children>
       </VBox>
