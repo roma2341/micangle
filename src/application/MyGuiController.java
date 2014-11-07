@@ -34,6 +34,12 @@ public class MyGuiController implements Initializable{
 	private NumberAxis signalsChartYAxis;
 	@FXML		
 	private Button button_process;
+	@FXML
+	private Button button_showMaximums;
+	
+	public Button getButton_showMaximums() {
+		return button_showMaximums;
+	}
 	public NumberAxis getSignalsChartXAxis() {
 		return signalsChartXAxis;
 	}

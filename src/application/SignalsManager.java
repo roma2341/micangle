@@ -91,7 +91,6 @@ public class SignalsManager {
 	
 		public double getSm(double T){
 			double[] SMn = new double[Mn.size()];;
-			int SMiterator = 0;
 			double SM=0;
 			int i=0,j=0;
 		

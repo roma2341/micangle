@@ -62,6 +62,7 @@
             <Button fx:id="button_process" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="Обрахунки" />
             <Button fx:id="button_addSoundEmiterControls" mnemonicParsing="false" text="Контролер звуків" />
             <Button fx:id="button_dataInput" mnemonicParsing="false" text="Ввести дані" />
+            <Button fx:id="button_showMaximums" mnemonicParsing="false" text="Графік максимумів" />
          </children>
       </VBox>
    </children>

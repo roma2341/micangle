@@ -22,7 +22,7 @@ import javafx.stage.Stage;
 
 
 public class Main extends Application {
-	 final double TIME_X = 0.011764706;
+	
 	FXMLLoader loader;
 	MyGuiController controller;
 	SignalsManager sm;
@@ -32,7 +32,7 @@ public class Main extends Application {
 			initRootLayout();
 		controller = (MyGuiController)loader.getController();
 		sm = new SignalsManager();
-	        //populating the series with data
+	        //Заповнення серії інформацією
 	       // series.getData().add(new XYChart.Data("2", 14));
 	     
 		controller.getButton_addSoundEmiterControls().setOnAction(new EventHandler<ActionEvent>(){
@@ -62,10 +62,16 @@ public class Main extends Application {
 
 				@Override
 				public void handle(ActionEvent event) {
-					processData();
+					processSMDiagram();
 				}
 			});
-			
+			controller.getButton_showMaximums().setOnAction(new EventHandler<ActionEvent>(){
+
+				@Override
+				public void handle(ActionEvent event) {
+					processSMDiagramMaxes();
+				}
+			});
 			
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -113,7 +119,7 @@ public class Main extends Application {
 	                //changes the x position of the circle
 	                emiter.x=sliderX.getValue();
 	                sm.processTimings();
-	                processData();
+	                processSMDiagram();
 	            }
 	        });
 	         
@@ -132,7 +138,7 @@ public class Main extends Application {
 	                //changes the x position of the circle
 	                emiter.y=sliderY.getValue();
 	                sm.processTimings();
-	                processData();
+	                processSMDiagram();
 	            }
 	        });
 	         
@@ -164,8 +170,9 @@ public class Main extends Application {
 	
 		 }
 	}
-	public void processData(){
-				    
+	public void processSMDiagram(){
+		double TIME_X = 4/sm.F; 
+		final int TICK_COUNT = 20;
 			Comber comb = new Comber(sm.Mn.size());
 			BitSet[] coombs = comb.getCoombs();
 			if(controller.getCheckbox_chartAutorangingX().isSelected())controller.getSignalsChartXAxis().setAutoRanging(true);
@@ -194,7 +201,7 @@ public class Main extends Application {
 			}
 		
 		
-			int SERIES_COUNT = 1;
+			int SERIES_COUNT = 2;
 			ArrayList<XYChart.Series<Number,Number>> series = new ArrayList<XYChart.Series<Number, Number>>(SERIES_COUNT);
 			for (int i=0;i<SERIES_COUNT;i++)
 			{
@@ -211,19 +218,99 @@ public class Main extends Application {
 			{
 				series.get(k).setName(String.valueOf(k));
 			}
+			series.get(SERIES_COUNT-1).setName("MAX");
 			double value = 0;
 			double t=0;
+			
+			double[] SM = new double[TICK_COUNT];
 			while (t<TIME_X)
 			{
 					value = sm.getSm(t);
 					controller.getTextarea_output().appendText("SM:"+value+"\n");	
 					 series.get(0).getData().add(new XYChart.Data(t*1000, value));
-			t+=TIME_X/50;
+			t+=TIME_X/TICK_COUNT;
 			}
+			
 			for (	Series<Number, Number> serie : series)
 			 controller.getSignalsChart().getData().add(serie);
 		}
+	
+	public void processSMDiagramMaxes(){
+		double TIME_X = 4/sm.F; 
+		final int TICK_COUNT = 5;
+			Comber comb = new Comber(sm.Mn.size());
+			BitSet[] coombs = comb.getCoombs();
+			if(controller.getCheckbox_chartAutorangingX().isSelected())controller.getSignalsChartXAxis().setAutoRanging(true);
+			else {
+				controller.getSignalsChartXAxis().setAutoRanging(false);
+				String maxXStr = controller.getTextfield_maxChartX().getText(); 
+				String minXStr = controller.getTextfield_minChartX().getText(); 
+				if (!(maxXStr.length()<1 || minXStr.length()<1)) {
+				double maxX = Double.parseDouble(maxXStr);
+				double minX = Double.parseDouble(minXStr);
+				controller.getSignalsChartXAxis().setUpperBound(maxX);
+				controller.getSignalsChartXAxis().setLowerBound(minX);
+				}
+			}
+			if(controller.getCheckbox_chartAutorangingY().isSelected())controller.getSignalsChartYAxis().setAutoRanging(true);
+			else {
+				controller.getSignalsChartYAxis().setAutoRanging(false);
+				String maxYStr = controller.getTextfield_maxChartY().getText(); 
+				String minYStr = controller.getTextfield_minChartY().getText(); 
+				if (!(maxYStr.length()<1 || minYStr.length()<1)) {
+				double maxY = Double.parseDouble(maxYStr);
+				double minY = Double.parseDouble(minYStr);
+				controller.getSignalsChartYAxis().setUpperBound(maxY);
+				controller.getSignalsChartYAxis().setLowerBound(minY);
+				}
+			}
 		
+		
+			int SERIES_COUNT = 2;
+			ArrayList<XYChart.Series<Number,Number>> series = new ArrayList<XYChart.Series<Number, Number>>(SERIES_COUNT);
+			for (int i=0;i<SERIES_COUNT;i++)
+			{
+				series.add(new XYChart.Series<Number,Number>());
+			}
+			//sm.SMn = new double[sm.Mn.size()];
+			//Звук(X:-1;y:1.0;A:1.0)
+		
+			//int i=0;
+			controller.getSignalsChart().getData().clear();
+		
+			//ДАти серіям імя
+			for (int k=0;k<SERIES_COUNT;k++)
+			{
+				series.get(k).setName(String.valueOf(k));
+			}
+			series.get(SERIES_COUNT-1).setName("MAX");
+			double value = 0;
+			double t=0;
+			
+			double[] SM = new double[TICK_COUNT];
+			double max=0;
+			for (int i=-50;i<50;i++)
+			{
+				t=0;
+			while (t<TIME_X)
+			{	
+				//sm.Sn.get(0).y+=1;
+				sm.processTimings();
+					value = sm.getSm(t);
+					controller.getTextarea_output().appendText("SM:"+value+"\n");	
+					// series.get(0).getData().add(new XYChart.Data(t*1000, value));
+					 t+=TIME_X/TICK_COUNT;
+					 if (value>max)max=value;
+			}
+			 series.get(1).getData().add(new XYChart.Data(i, max));
+			 System.out.println("max:"+max+" x:"+sm.Sn.get(0).x);
+			 max=0;
+				sm.Sn.get(0).x=i;
+			}
+			
+			for (	Series<Number, Number> serie : series)
+			 controller.getSignalsChart().getData().add(serie);
+		}
 	
 	
 	public static void main(String[] args) {
