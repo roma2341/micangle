@@ -28,10 +28,10 @@
          <children>
             <LineChart fx:id="signalsChart" animated="false" createSymbols="false">
               <xAxis>
-                <NumberAxis fx:id="signalsChartXAxis" side="BOTTOM" upperBound="10.0" />
+                <NumberAxis fx:id="signalsChartXAxis" animated="false" side="BOTTOM" upperBound="10.0" />
               </xAxis>
               <yAxis>
-                <NumberAxis fx:id="signalsChartYAxis" lowerBound="-5.0" side="LEFT" upperBound="5.0" />
+                <NumberAxis fx:id="signalsChartYAxis" animated="false" lowerBound="-5.0" side="LEFT" upperBound="5.0" />
               </yAxis>
             </LineChart>
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
@@ -54,15 +54,30 @@
             </HBox>
             <HBox alignment="CENTER">
                <children>
-                  <TextArea fx:id="textarea_input" text="З(X:0;y:1.0;A:1.0)&#10;М(X:-1;y:0)&#10;М(X:1;y:0)" />
+                  <TextArea fx:id="textarea_input" text="З(X:0;y:1.0;A:1.0;F:340)&#10;М(X:-0.3;y:0)&#10;М(X:0.3;y:0)&#10;М(X:-0.6;y:0)&#10;М(X:0.6;y:0)" />
                   <TextArea fx:id="textarea_output" />
                </children>
             </HBox>
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Label text="Введена похибка" />
+                  <TextField fx:id="textfield_errorValue" />
+               </children>
+            </HBox>
             <VBox fx:id="slidersVBox" prefHeight="200.0" prefWidth="100.0" />
-            <Button fx:id="button_process" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="Обрахунки" />
-            <Button fx:id="button_addSoundEmiterControls" mnemonicParsing="false" text="Контролер звуків" />
-            <Button fx:id="button_dataInput" mnemonicParsing="false" text="Ввести дані" />
-            <Button fx:id="button_showMaximums" mnemonicParsing="false" text="Графік максимумів" />
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Button fx:id="button_dataInput" mnemonicParsing="false" text="Ввести дані" />
+                  <Button fx:id="button_process" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="Обрахунки" />
+                  <Button fx:id="button_showMaximums" mnemonicParsing="false" text="Графік максимумів" />
+               </children>
+            </HBox>
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Button fx:id="button_addSoundEmiterControls" mnemonicParsing="false" text="Контролер звуків" />
+                  <Button fx:id="button_updateChart" mnemonicParsing="false" text="Оновити графік" />
+               </children>
+            </HBox>
          </children>
       </VBox>
    </children>

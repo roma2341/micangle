@@ -36,7 +36,12 @@ public class MyGuiController implements Initializable{
 	private Button button_process;
 	@FXML
 	private Button button_showMaximums;
+	@FXML
+	private Button button_updateChart;
 	
+	public Button getButton_updateChart() {
+		return button_updateChart;
+	}
 	public Button getButton_showMaximums() {
 		return button_showMaximums;
 	}
@@ -84,6 +89,11 @@ public class MyGuiController implements Initializable{
 	private AnchorPane rootLayout;
 	@FXML
 	private TextField textfield_minChartX;
+	@FXML
+	private TextField textfield_errorValue;
+	public TextField getTextfield_errorValue() {
+		return textfield_errorValue;
+	}
 	@FXML
 	private TextField textfield_minChartY;
 	public TextField getTextfield_minChartY() {

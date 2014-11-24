@@ -1,0 +1,43 @@
+<html><head>
+  <SCRIPT src="http://java.com/js/dtjava.js"></SCRIPT>
+<script>
+    function launchApplication(jnlpfile) {
+        dtjava.launch(            {
+                url : 'MicSignal.jnlp'
+            },
+            {
+                javafx : '8.0+'
+            },
+            {}
+        );
+        return false;
+    }
+</script>
+
+<script>
+    function javafxEmbed_fxApplication() {
+        dtjava.embed(
+            {
+                id : 'fxApplication',
+                url : 'MicSignal.jnlp',
+                placeholder : 'myApplet',
+                width : 800,
+                height : 800
+            },
+            {
+                javafx : '8.0+'
+            },
+            {}
+        );
+    }
+    <!-- Embed FX application into web page once page is loaded -->
+    dtjava.addOnloadCallback(javafxEmbed_fxApplication);
+</script>
+
+</head><body>
+<h2>Test page for <b>MicSignal</b></h2>
+  <b>Webstart:</b> <a href='MicSignal.jnlp' onclick="return launchApplication('MicSignal.jnlp');">click to launch this app as webstart</a><br><hr><br>
+
+  <!-- Applet will be inserted here -->
+  <div id='myApplet'></div>
+</body></html>

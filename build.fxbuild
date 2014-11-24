@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ASCII"?>
 <anttasks:AntTask xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:anttasks="http://org.eclipse.fx.ide.jdt/1.0" buildDirectory="${project}/build">
-  <deploy>
-    <application name="MicSignal" mainclass="application.Main"/>
+  <deploy height="800" placeholderref="myApplet" placeholderid="myApplet" width="800">
+    <application name="MicSignal" mainclass="application.Main" version="1"/>
     <info title="MicSignal" vendor="MicSignal"/>
   </deploy>
   <signjar/>
