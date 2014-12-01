@@ -29,6 +29,11 @@ public class MyGuiController implements Initializable{
 	@FXML	
 	private		MenuItem undo ;
 	@FXML
+	private AnchorPane mapAnchorPane;
+	public AnchorPane getMapAnchorPane() {
+		return mapAnchorPane;
+	}
+	@FXML
 	private NumberAxis signalsChartXAxis;
 	@FXML
 	private NumberAxis signalsChartYAxis;
@@ -38,7 +43,22 @@ public class MyGuiController implements Initializable{
 	private Button button_showMaximums;
 	@FXML
 	private Button button_updateChart;
+	@FXML
+	private Button button_rotate;
+	@FXML
+	private Button button_delay;
+	@FXML
+	private Button button_dataToChart;
 	
+	public Button getButton_dataToChart() {
+		return button_dataToChart;
+	}
+	public Button getButton_delay() {
+		return button_delay;
+	}
+	public Button getButton_rotate() {
+		return button_rotate;
+	}
 	public Button getButton_updateChart() {
 		return button_updateChart;
 	}
@@ -85,6 +105,11 @@ public class MyGuiController implements Initializable{
 	private TextArea textarea_input;
 	@FXML		
 	private TextArea textarea_output;
+	@FXML
+	private TextField textfield_rotationAngle;
+	public TextField getTextfield_rotationAngle() {
+		return textfield_rotationAngle;
+	}
 	@FXML
 	private AnchorPane rootLayout;
 	@FXML

@@ -37,9 +37,9 @@
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                <children>
                   <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Min" />
-                  <TextField fx:id="textfield_minChartX" />
+                  <TextField fx:id="textfield_minChartX" text="0.1" />
                   <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Max" />
-                  <TextField fx:id="textfield_maxChartX" />
+                  <TextField fx:id="textfield_maxChartX" text="0.12" />
                   <CheckBox fx:id="checkbox_chartAutorangingX" mnemonicParsing="false" text="Автограниця" />
                </children>
             </HBox>
@@ -52,32 +52,37 @@
                   <CheckBox fx:id="checkbox_chartAutorangingY" mnemonicParsing="false" text="Автограниця" />
                </children>
             </HBox>
-            <HBox alignment="CENTER">
+            <HBox alignment="CENTER" minHeight="100.0">
                <children>
-                  <TextArea fx:id="textarea_input" text="З(X:0;y:1.0;A:1.0;F:340)&#10;М(X:-0.3;y:0)&#10;М(X:0.3;y:0)&#10;М(X:-0.6;y:0)&#10;М(X:0.6;y:0)" />
-                  <TextArea fx:id="textarea_output" />
+                  <TextArea fx:id="textarea_input" text="З(X:0;y:100.0;A:1.0;F:340)&#10;М(X:-0.15;y:0)&#10;М(X:0.15;y:0)&#10;М(X:-0.3;y:0)&#10;М(X:0.3;y:0)" />
+                  <TextArea fx:id="textarea_output" text="-1,1,-2,2" />
                </children>
             </HBox>
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
                   <Label text="Введена похибка" />
                   <TextField fx:id="textfield_errorValue" />
+                  <Button fx:id="button_rotate" mnemonicParsing="false" text="Повернути" />
+                  <TextField fx:id="textfield_rotationAngle" />
+                  <Button fx:id="button_delay" mnemonicParsing="false" text="Затримка" />
                </children>
             </HBox>
-            <VBox fx:id="slidersVBox" prefHeight="200.0" prefWidth="100.0" />
+            <VBox fx:id="slidersVBox" prefHeight="20.0" prefWidth="625.0" />
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
                   <Button fx:id="button_dataInput" mnemonicParsing="false" text="Ввести дані" />
                   <Button fx:id="button_process" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="Обрахунки" />
                   <Button fx:id="button_showMaximums" mnemonicParsing="false" text="Графік максимумів" />
-               </children>
-            </HBox>
-            <HBox prefHeight="100.0" prefWidth="200.0">
-               <children>
                   <Button fx:id="button_addSoundEmiterControls" mnemonicParsing="false" text="Контролер звуків" />
                   <Button fx:id="button_updateChart" mnemonicParsing="false" text="Оновити графік" />
+                  <Button fx:id="button_dataToChart" mnemonicParsing="false" text="Дані-&gt;Графік" />
                </children>
             </HBox>
+            <ScrollPane>
+              <content>
+                <AnchorPane fx:id="mapAnchorPane" minHeight="0.0" minWidth="0.0" />
+              </content>
+            </ScrollPane>
          </children>
       </VBox>
    </children>
