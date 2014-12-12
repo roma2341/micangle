@@ -65,20 +65,8 @@ public class SignalsManager {
 				result[i][j]=source[i-delay][j];
 			}
 		}
-		/*for (int i=0;i<source.length;i++)
-		{
-			for (int j=0;j<source[i].length;j++)
-				System.out.print(source[i][j]+" ");
-			System.out.println();
-		}
-		System.out.println("");
-		for (int i=0;i<result.length;i++)
-		{
-			for (int j=0;j<result[i].length;j++)
-				System.out.print(result[i][j]+" ");
-			System.out.println();
-		}
-		System.out.println("****");*/
+		
+	
 		return result;
 	}
 	
@@ -122,7 +110,7 @@ public class SignalsManager {
 	 * @param angle
 	 * @return
 	 */
-	public double[] processDelay(int angle)
+	public double[] processDelay_deprecated(int angle)
 	{
 		double[] delays = new double[Mn.size()];
 		double[] micPaneCenter = getCenterOfMicPane(); 
@@ -208,11 +196,22 @@ public class SignalsManager {
 			//Звук(x:0;y:10;А:10)
 			
 		}
-	 static public double[] toSM(double[][] SMn){
+	 static public double[] toSM(double[][] SMn,boolean isCorelation){
+		 if (SMn==null)return null;
 		double[] result = new double[SMn.length];
+		if (isCorelation)
+		{
+		for (int i=0;i<result.length;i++)
+			result[i]=1;
 		for (int i=0;i<SMn.length;i++)
 			for (int j=0;j<SMn[i].length;j++)
-				result[i]+=SMn[i][j];
+				result[i]=result[i]*SMn[i][j];
+		}
+		else
+			for (int i=0;i<SMn.length;i++)
+				for (int j=0;j<SMn[i].length;j++)
+					result[i]=result[i]+SMn[i][j];
+		
 		return result;
 				
 	}

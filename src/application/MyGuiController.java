@@ -9,6 +9,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -34,33 +35,33 @@ public class MyGuiController implements Initializable{
 		return mapAnchorPane;
 	}
 	@FXML
+	private Label label_status;
+	public Label getLabel_status() {
+		return label_status;
+	}
+	@FXML
 	private NumberAxis signalsChartXAxis;
 	@FXML
 	private NumberAxis signalsChartYAxis;
-	@FXML		
-	private Button button_process;
+	@FXML	
+	private Button button_processSinusoid;
 	@FXML
 	private Button button_showMaximums;
 	@FXML
 	private Button button_updateChart;
-	@FXML
-	private Button button_rotate;
-	@FXML
-	private Button button_delay;
-	@FXML
-	private Button button_dataToChart;
+
+	@FXML 
+	private TextField textfield_viewArea;
 	
-	public Button getButton_dataToChart() {
-		return button_dataToChart;
+	public TextField getTextfield_viewArea() {
+		return textfield_viewArea;
 	}
-	public Button getButton_delay() {
-		return button_delay;
-	}
-	public Button getButton_rotate() {
-		return button_rotate;
-	}
+
 	public Button getButton_updateChart() {
 		return button_updateChart;
+	}
+	public Button getButton_processSinusoid() {
+		return button_processSinusoid;
 	}
 	public Button getButton_showMaximums() {
 		return button_showMaximums;
@@ -72,7 +73,7 @@ public class MyGuiController implements Initializable{
 		return signalsChartYAxis;
 	}
 	public Button getButton_process() {
-		return button_process;
+		return button_processSinusoid;
 	}
 	@FXML
 	Button button_dataInput;
@@ -104,11 +105,16 @@ public class MyGuiController implements Initializable{
 	@FXML		
 	private TextArea textarea_input;
 	@FXML		
-	private TextArea textarea_output;
+	private TextArea textarea_delays;
 	@FXML
 	private TextField textfield_rotationAngle;
 	public TextField getTextfield_rotationAngle() {
 		return textfield_rotationAngle;
+	}
+	@FXML
+	private CheckBox checkbox_isCorelation;
+	public CheckBox getCheckbox_isCorelation() {
+		return checkbox_isCorelation;
 	}
 	@FXML
 	private AnchorPane rootLayout;
@@ -153,9 +159,7 @@ public class MyGuiController implements Initializable{
 	public Menu getMenuFile() {
 		return menuFile;
 	}
-	public MenuItem getProcess() {
-		return process;
-	}
+
 	public MenuItem getOpen() {
 		return open;
 	}
@@ -173,10 +177,8 @@ public class MyGuiController implements Initializable{
 	public void setTextarea_input(TextArea textarea_input) {
 		this.textarea_input = textarea_input;
 	}
-	public TextArea getTextarea_output() {
-		return textarea_output;
+	public TextArea getTextarea_delays() {
+		return textarea_delays;
 	}
-	public void setTextarea_output(TextArea textarea_output) {
-		this.textarea_output = textarea_output;
-	}
+
 }

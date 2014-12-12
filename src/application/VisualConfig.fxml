@@ -13,18 +13,7 @@
 
 <AnchorPane fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.MyGuiController">
    <children>
-      <MenuBar fx:id="menuBar" prefHeight="29.0" prefWidth="255.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
-        <menus>
-          <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem fx:id="open" mnemonicParsing="false" text="Open" />
-                  <MenuItem fx:id="process" mnemonicParsing="false" text="Process" />
-                  <MenuItem fx:id="undo" mnemonicParsing="false" text="Undo" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
-      <VBox fx:id="mainVBox" alignment="CENTER" layoutY="29.0" prefHeight="454.0" prefWidth="640.0" AnchorPane.bottomAnchor="-3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="29.0">
+      <VBox fx:id="mainVBox" alignment="TOP_CENTER" layoutY="29.0" prefHeight="454.0" prefWidth="640.0" AnchorPane.bottomAnchor="-3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="29.0">
          <children>
             <LineChart fx:id="signalsChart" animated="false" createSymbols="false">
               <xAxis>
@@ -55,27 +44,31 @@
             <HBox alignment="CENTER" minHeight="100.0">
                <children>
                   <TextArea fx:id="textarea_input" text="З(X:0;y:100.0;A:1.0;F:340)&#10;М(X:-0.15;y:0)&#10;М(X:0.15;y:0)&#10;М(X:-0.3;y:0)&#10;М(X:0.3;y:0)" />
-                  <TextArea fx:id="textarea_output" text="-1,1,-2,2" />
                </children>
             </HBox>
-            <HBox prefHeight="100.0" prefWidth="200.0">
+            <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <CheckBox fx:id="checkbox_isCorelation" mnemonicParsing="false" text="Кореляція" />
+               </children>
+            </HBox>
+            <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0">
                <children>
                   <Label text="Введена похибка" />
-                  <TextField fx:id="textfield_errorValue" />
-                  <Button fx:id="button_rotate" mnemonicParsing="false" text="Повернути" />
-                  <TextField fx:id="textfield_rotationAngle" />
-                  <Button fx:id="button_delay" mnemonicParsing="false" text="Затримка" />
+                  <TextField fx:id="textfield_errorValue" prefHeight="25.0" prefWidth="67.0" />
+                  <Label text="Поточна область (0-11)" />
+                  <TextField fx:id="textfield_viewArea" prefHeight="25.0" prefWidth="33.0" />
+                  <Label text="Затримки" />
+                  <TextArea fx:id="textarea_delays" prefHeight="25.0" prefWidth="208.0" text="-1,1,-2,2" />
                </children>
             </HBox>
             <VBox fx:id="slidersVBox" prefHeight="20.0" prefWidth="625.0" />
-            <HBox prefHeight="100.0" prefWidth="200.0">
+            <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0">
                <children>
                   <Button fx:id="button_dataInput" mnemonicParsing="false" text="Ввести дані" />
-                  <Button fx:id="button_process" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="Обрахунки" />
+                  <Button fx:id="button_processSinusoid" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="Обрахунки" />
                   <Button fx:id="button_showMaximums" mnemonicParsing="false" text="Графік максимумів" />
                   <Button fx:id="button_addSoundEmiterControls" mnemonicParsing="false" text="Контролер звуків" />
                   <Button fx:id="button_updateChart" mnemonicParsing="false" text="Оновити графік" />
-                  <Button fx:id="button_dataToChart" mnemonicParsing="false" text="Дані-&gt;Графік" />
                </children>
             </HBox>
             <ScrollPane>
