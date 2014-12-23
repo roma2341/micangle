@@ -19,122 +19,104 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 
 public class MyGuiController implements Initializable{
-	@FXML	
-	private		MenuBar menuBar;
-	@FXML	
-	private		Menu menuFile ;
-	@FXML	
-	private		MenuItem process ;
-	@FXML	
-	private		MenuItem open ;
-	@FXML	
-	private		MenuItem undo ;
 	@FXML
 	private AnchorPane mapAnchorPane;
-	public AnchorPane getMapAnchorPane() {
-		return mapAnchorPane;
-	}
-	@FXML
-	private Label label_status;
-	public Label getLabel_status() {
-		return label_status;
-	}
 	@FXML
 	private NumberAxis signalsChartXAxis;
 	@FXML
 	private NumberAxis signalsChartYAxis;
-	@FXML	
-	private Button button_processSinusoid;
-	@FXML
-	private Button button_showMaximums;
 	@FXML
 	private Button button_updateChart;
-
-	@FXML 
-	private TextField textfield_viewArea;
-	
-	public TextField getTextfield_viewArea() {
-		return textfield_viewArea;
-	}
-
-	public Button getButton_updateChart() {
-		return button_updateChart;
-	}
-	public Button getButton_processSinusoid() {
-		return button_processSinusoid;
-	}
-	public Button getButton_showMaximums() {
-		return button_showMaximums;
-	}
-	public NumberAxis getSignalsChartXAxis() {
-		return signalsChartXAxis;
-	}
-	public NumberAxis getSignalsChartYAxis() {
-		return signalsChartYAxis;
-	}
-	public Button getButton_process() {
-		return button_processSinusoid;
-	}
+	@FXML
+	private Button button_interCorelation;
 	@FXML
 	Button button_dataInput;
-	
-	public Button getButton_dataInput() {
-		return button_dataInput;
-	}
 	@FXML
-	Button button_addSoundEmiterControls;
-	public Button getButton_addSoundEmiterControls() {
-		return button_addSoundEmiterControls;
-	}
+	private TextField textfield_maxChartX;
 	@FXML
-	private LineChart<Number,Number> signalsChart;
-	public LineChart getSignalsChart() {
-		return signalsChart;
-	}
+	private TextField textfield_maxChartY;
+	@FXML
+	private CheckBox checkbox_chartAutorangingX;
+	@FXML
+	private CheckBox checkbox_chartAutorangingY;
 	@FXML
 	private VBox mainVBox;
-	public VBox getMainVBox() {
-		return mainVBox;
-	}
+	@FXML
+	private LineChart<Number,Number> signalsChart;
 	@FXML
 	private VBox slidersVBox;
-	
-	public VBox getSlidersVBox() {
-		return slidersVBox;
-	}
 	@FXML		
 	private TextArea textarea_input;
 	@FXML		
 	private TextArea textarea_delays;
 	@FXML
 	private TextField textfield_rotationAngle;
-	public TextField getTextfield_rotationAngle() {
-		return textfield_rotationAngle;
-	}
 	@FXML
 	private CheckBox checkbox_isCorelation;
-	public CheckBox getCheckbox_isCorelation() {
-		return checkbox_isCorelation;
-	}
 	@FXML
 	private AnchorPane rootLayout;
 	@FXML
 	private TextField textfield_minChartX;
 	@FXML
+	private TextField textfield_minChartY;
+	@FXML
 	private TextField textfield_errorValue;
+	
+	public Button getButton_interCorelation() {
+		return button_interCorelation;
+	}
+	
+	public AnchorPane getMapAnchorPane() {
+		return mapAnchorPane;
+	}	
+
+	public Button getButton_updateChart() {
+		return button_updateChart;
+	}
+
+	public NumberAxis getSignalsChartXAxis() {
+		return signalsChartXAxis;
+	}
+	public NumberAxis getSignalsChartYAxis() {
+		return signalsChartYAxis;
+	}
+
+	public Button getButton_dataInput() {
+		return button_dataInput;
+	}
+
+	public LineChart getSignalsChart() {
+		return signalsChart;
+	}
+
+	public VBox getMainVBox() {
+		return mainVBox;
+	}
+	
+	
+	public VBox getSlidersVBox() {
+		return slidersVBox;
+	}
+	
+	public TextField getTextfield_rotationAngle() {
+		return textfield_rotationAngle;
+	}
+	
+	public CheckBox getCheckbox_isCorelation() {
+		return checkbox_isCorelation;
+	}
+	
 	public TextField getTextfield_errorValue() {
 		return textfield_errorValue;
 	}
-	@FXML
-	private TextField textfield_minChartY;
+	
 	public TextField getTextfield_minChartY() {
 		return textfield_minChartY;
 	}
 	public TextField getTextfield_maxChartY() {
 		return textfield_maxChartY;
 	}
-	@FXML
-	private TextField textfield_maxChartY;
+	
 	public TextField getTextfield_minChartX() {
 		return textfield_minChartX;
 	}
@@ -147,27 +129,6 @@ public class MyGuiController implements Initializable{
 	public CheckBox getCheckbox_chartAutorangingY() {
 		return checkbox_chartAutorangingY;
 	}
-	@FXML
-	private TextField textfield_maxChartX;
-	@FXML
-	private CheckBox checkbox_chartAutorangingX;
-	@FXML
-	private CheckBox checkbox_chartAutorangingY;
-	public MenuBar getMenuBar() {
-		return menuBar;
-	}
-	public Menu getMenuFile() {
-		return menuFile;
-	}
-
-	public MenuItem getOpen() {
-		return open;
-	}
-	public MenuItem getUndo() {
-		return undo;
-	}
-	
-	
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 	}

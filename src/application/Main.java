@@ -4,6 +4,12 @@ import java.beans.PropertyChangeListenerProxy;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.sun.javafx.logging.Logger;
 
@@ -31,21 +37,17 @@ import javafx.stage.Stage;
 public class Main extends Application {
 	
 	final int SAMPLING_RATE = 48000;
-	final int VIEW_AREAS_COUNT = 12;
-	int currentViewArea = 0;
-	double TIME_X = 1;
-	double[][] SMn;
-	int[] delays;
+	double TIME_X = 20.83; //1 секунда
 	FXMLLoader loader;
 	boolean isCorelation=false;
 	MyGuiController controller;
+	int[] delays;
 	SignalsManager sm;
 	ScatterChart<Number,Number> sc;
 	@Override
 	public void start(Stage primaryStage) {
 		try {
-			initRootLayout();
-			
+			initRootLayout();			
 		controller = (MyGuiController)loader.getController();
 		//Введена похибка
 		String str = controller.getTextfield_errorValue().getText();
@@ -64,18 +66,48 @@ public class Main extends Application {
 		}
 	}
 	int dataInputCounter=0;
+	
+	public static void runAndWait(Runnable action) {
+	    if (action == null)
+	        throw new NullPointerException("action");
+	 
+	    // run synchronously on JavaFX thread
+	    if (Platform.isFxApplicationThread()) {
+	        action.run();
+	        return;
+	    }
+	 
+	    // queue on JavaFX thread and wait for completion
+	    final CountDownLatch doneLatch = new CountDownLatch(1);
+	    Platform.runLater(() -> {
+	        try {
+	            action.run();
+	        } finally {
+	            doneLatch.countDown();
+	        }
+	    });
+	 
+	    try {
+	        doneLatch.await();
+	    } catch (InterruptedException e) {
+	        // ignore exception
+	    }
+	}
+	
 	public void initButtons()
 	{
 		
-		controller.getButton_addSoundEmiterControls().setOnAction(new EventHandler<ActionEvent>(){
+		controller.getButton_interCorelation().setOnAction(new EventHandler<ActionEvent>(){
 
 			@Override
-			public void handle(ActionEvent event) {
-				addSoundEmiterControls(sm.Sn,50);
+			public void handle(ActionEvent event) {	
+				sm.Sn.get(0).setSignal(sm.Sn.get(0).processEmiterArr(TIME_X,SAMPLING_RATE,sm.Sn.get(0).F));
+				int[][] SMn = sm.Sn.get(0).getSMnArr(sm.Mn);
+				showCorelationDependencyOfN(SMn);
 			}
 			
 		});
-	
+		
 		controller.getButton_dataInput().setOnAction(new EventHandler<ActionEvent>(){
 
 			@Override
@@ -84,63 +116,31 @@ public class Main extends Application {
 				String inputText = controller.getTextarea_input().getText();
 				// Введенна похибка
 				String str = controller.getTextfield_errorValue().getText();
-				String curViewAreaStr=controller.getTextfield_viewArea().getText();
-				if (!curViewAreaStr.isEmpty())currentViewArea = Integer.parseInt(curViewAreaStr);
 				double inputedError=0;
 				//currentViewArea=0;
 				if (!str.isEmpty())
 				inputedError = Double.parseDouble(str);
-				//
 				sm = new SignalsManager(inputedError);			
 				sm.addSoundEmiterFromString(inputText);
 				sm.addMicrophoneFromString(inputText);
-				sm.processTimings();
-			//	SignalsManager.checkOneLinePosition(sm.Mn);
 				dataInputCounter++;
 				fillScatterChartData();
-				System.out.println("inputedError:"+inputedError+" currentViewArea:"+currentViewArea);
+				//Тест
+				/*sm.Sn.get(0).setSignal(sm.Sn.get(0).processEmiterArr(TIME_X,SAMPLING_RATE));
+				int[] SMn = sm.Sn.get(0).signal;
+				double t=TIME_X/SAMPLING_RATE;
+				controller.getSignalsChart().getData().clear();
+				XYChart.Series<Number, Number> serie= new XYChart.Series<Number, Number>();
+					for (int j=0;j<SMn.length/500;j++)
+					serie.getData().add(new XYChart.Data<Number,Number>(t*j,SMn[j]));
+					controller.getSignalsChart().getData().add(serie);
+				checkSettings();*/
+				//Кінець тесту
+				
 			}
 			
 		});
-			controller.getButton_process().setOnAction(new EventHandler<ActionEvent>(){
 
-				@Override
-				public void handle(ActionEvent event) {
-					processSMDiagram();
-					updateSMDiagram();
-				}
-			});
-			controller.getButton_showMaximums().setOnAction(new EventHandler<ActionEvent>(){
-
-				@Override
-				public void handle(ActionEvent event) {
-					processSMDiagramMaxes();
-				}
-			});
-	
-		
-			controller.getButton_updateChart().setOnAction(new EventHandler<ActionEvent>(){
-
-				@Override
-				public void handle(ActionEvent event) {
-					checkSettings();
-					//SignalsManager.rotateMicPane(sm.Mn, 10);
-					fillScatterChartData();
-				}
-			});
-			
-			/*controller.getButton_rotate().setOnAction(new EventHandler<ActionEvent>(){
-
-				@Override
-				public void handle(ActionEvent event) {
-					String angleString = controller.getTextfield_rotationAngle().getText();
-					Integer angle = 0;
-					if (!angleString.isEmpty())angle=Integer.parseInt(angleString);
-					sm.rotateMicPane(sm.Mn, angle);
-					fillScatterChartData();
-				}
-			});*/
-	
 	}
 	
 	public void initRootLayout() {
@@ -181,10 +181,7 @@ public class Main extends Application {
 	            @Override
 	            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 	                //changes the x position of the circle
-	                emiter.x=sliderX.getValue();
-	                sm.processTimings();
-	                processSMDiagram();
-	                updateSMDiagram();
+	                emiter.x=(int) sliderX.getValue();
 	            }
 	        });
 	         
@@ -202,10 +199,9 @@ public class Main extends Application {
 	            @Override
 	            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
 	                //changes the x position of the circle
-	                emiter.y=sliderY.getValue();
-	                sm.processTimings();
-	                processSMDiagram();
-	                updateSMDiagram();
+	                emiter.y=(int) sliderY.getValue();
+	              //  processSMDiagram();
+	               // updateSMDiagram();
 	            }
 	        });
 	         
@@ -345,124 +341,69 @@ public void fillScatterChartData(){
 		
 	
 	}
-	public void WORKING_processSMDiagram_Deprecated(){
-		final int TICK_COUNT = SAMPLING_RATE;
-		 checkSettings();
-			XYChart.Series<Number,Number> serie= new XYChart.Series<Number, Number>();
-			controller.getSignalsChart().getData().clear();
-			//serie.setName(String.valueOf(k));
-			double value = 0;
-			double t=0;
-			
-			double[] SM = new double[TICK_COUNT];
-			int i=0;
-			
-			while (t<=TIME_X)
-			{
-					value = sm.getSm(t);
-					 serie.getData().add(new XYChart.Data(t*1000, value));
-			t+=TIME_X/TICK_COUNT;
-			System.out.println("i:"+i++);
-			}
-			
-			 controller.getSignalsChart().getData().add(serie);
-		}
-	public void processSMDiagram(){
-			checkSettings();
-			double value = 0;
-			int i=0;
-			SMn = new double[SAMPLING_RATE][sm.Mn.size()];
-			double step = TIME_X/SAMPLING_RATE;
-			double t=step*currentViewArea*SAMPLING_RATE/VIEW_AREAS_COUNT;
-			for (int l=0;l<SAMPLING_RATE;l++)
-			{
-				SMn[i++]=sm.getSMn(t);
-				t+= step;
-			}
-			/*for (int l=currentViewArea*SAMPLING_RATE/VIEW_AREAS_COUNT;l<(currentViewArea+1)*SAMPLING_RATE/VIEW_AREAS_COUNT;l++)
-			{
-				SMn[i++]=sm.getSMn(t);
-				t+= step;
-			}*/
-			SMn=SignalsManager.shift(SMn,delays);
-		}
-	public void updateSMDiagram()
-	{
+	
+
+	public void showSM_Unused(int[][] SMn){
+		
+		checkSettings();
 		if (SMn==null)return;
 		controller.getSignalsChart().getData().clear();
 		XYChart.Series<Number,Number> serie= new XYChart.Series<Number, Number>();
-		double[] SM = SignalsManager.toSM(SMn,isCorelation);
+		long[] SM = SignalsManager.toSM(SMn,isCorelation);
 		double step = TIME_X/SAMPLING_RATE;
 		ArrayList<XYChart.Data<Number,Number>> data= new ArrayList<XYChart.Data<Number,Number>>(SAMPLING_RATE);
-		double areaBegin = TIME_X/VIEW_AREAS_COUNT*currentViewArea;
-		for (int l =currentViewArea*SAMPLING_RATE/VIEW_AREAS_COUNT; l<(currentViewArea+1)*SAMPLING_RATE/VIEW_AREAS_COUNT;l++){
-			data.add(new XYChart.Data<Number,Number>(areaBegin+step*l,SM[l]));
-		 //l+=10; //Прискорюєм обчислення, бо біда з продуктивністю:(
+		double time=0;
+		for (int l =0; l<SM.length;l++){
+			 time = step*l;
+			data.add(new XYChart.Data<Number,Number>((double)time,(long)SM[l]));
 		}
 		 serie.getData().addAll(data);
 		 controller.getSignalsChart().getData().add(serie);
-		 controller.getSignalsChartXAxis().setLowerBound(areaBegin);
-		 controller.getSignalsChartXAxis().setUpperBound(areaBegin+1/TIME_X/VIEW_AREAS_COUNT);
 	}
-	
-	
-	public void processSMDiagramMaxes(){
-		if (sm.Sn.size()<1 || sm.Mn.size()<1)return;
+	long[][] shiftIndexesWithMaxSMvalue = null;
+	public void showCorelationDependencyOfN(int[][] SMn)
+	{
 		checkSettings();
-		XYChart.Series<Number,Number> serie =new XYChart.Series<Number,Number>();
-			//sm.SMn = new double[sm.Mn.size()];
+		//Графіка
+		Runnable showingRunnable = new Runnable(){
+			@Override
+		    public void run(){
 			controller.getSignalsChart().getData().clear();
-			//series.get(k).setName(String.valueOf(k));
-			double value = 0;
-			double t=0;
-			
-			double step = TIME_X/SAMPLING_RATE;
-			System.out.println("step:"+step);
-			double[][] SMn = new double[SAMPLING_RATE+1][sm.Mn.size()];
-			int min=-50;
-			int max=50;
-			//int delta=max-min;
-			//progressbar
-			//1000 - 100(delta)
-			//i - x
-			//x=delta*i/1000
-			for (int i=min;i<=max;i++)
+			ArrayList<XYChart.Series<Number,Number>> series= new ArrayList<XYChart.Series<Number, Number>>(shiftIndexesWithMaxSMvalue.length);
+			for (int i=0;i<shiftIndexesWithMaxSMvalue.length;i++)
 			{
-				//double progress = delta * i / 1000;
-				sm.Sn.get(0).x=i;
-				t=0;
-				int j=0;
-				sm.processTimings();
-			while (t<TIME_X)
-			{	
-				//sm.Sn.get(0).y+=1;
-					SMn[j++] = sm.getSMn(t);
-					 t+=step;
-
+				series.add(new XYChart.Series<Number,Number>());
+				for (int j=0;j<shiftIndexesWithMaxSMvalue[0].length;j++)
+				series.get(i).getData().add(new XYChart.Data<Number,Number>(j,shiftIndexesWithMaxSMvalue[i][j]));
+				controller.getSignalsChart().getData().add(series.get(i));
 			}
-
-			SMn=SignalsManager.shift(SMn,delays);
-			double[] SM = sm.toSM(SMn,isCorelation);
-			double SMsum = 0;
-			double maxSM=0;
-			
-			for (int l =0; l< SM.length;l++)
-			{
-				 SMsum+=SM[l];
-			if (SM[l]>maxSM)maxSM=SM[l];
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			if (isCorelation)
-			 serie.getData().add(new XYChart.Data(i, SMsum));
-			else serie.getData().add(new XYChart.Data(i, maxSM));
-		System.out.println("i:"+i);
-			 SMsum=0;
+			//draw
+			}};
+			//Логіка
+		new Thread(new Task<Void>() {
+			@Override
+			protected Void call() throws Exception {
+				System.out.println("Logic:"+SMn.length);
+				for (int i=0;i<SMn.length/sm.BUFFER_CAPACITY;i++)
+				{
+				  sm.fillBuffer(SMn,i*sm.BUFFER_CAPACITY,sm.BUFFER_CAPACITY);		 
+				  shiftIndexesWithMaxSMvalue = sm.interCorelationFunc(sm.buffer);
+				  runAndWait(showingRunnable);
+				}
+				  return null;
 			}
-			
-			 controller.getSignalsChart().getData().add(serie);
-			
+		}).start();
+		//marker1////////////////////////////////////////////////////////////////////
+				
+//////////////////////////////////
 	}
-	
-	
+
 	public static void main(String[] args) {
 		launch(args);
 	}
