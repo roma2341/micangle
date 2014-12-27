@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public class SignalsManager {
 	final static short MAX_SHORT = 32767;//32767
 	static double V =340;
-	final int BUFFER_CAPACITY = 4000;//8000
+	final int BUFFER_CAPACITY = 8000;//8000
 	ArrayList<SoundEmiter> Sn; 
 	ArrayList<Microphone> Mn ;
 	int buffer[][];
@@ -32,7 +32,7 @@ public class SignalsManager {
 		this.errorValueUpperLimit = errorValueUpperLimit;
 	}
 	public static int generateSignal(double t,double A,int F){
-		int signal = (int) (A * Math.sin(Math.toRadians(2*Math.PI*F*t))*MAX_SHORT);
+		int signal = (int) (A * Math.sin(2.0*Math.PI*F*t)*(double)MAX_SHORT);
 		return signal;
 	}
 	
@@ -196,7 +196,7 @@ public class SignalsManager {
 				
 	}
 	 public long[][]  interCorelationFunc(int[][] buffer){
-		 final int SHIFT_COUNT = 48;//48
+		 final int SHIFT_COUNT = 48;
 			int[] delays = new int[]{0,0,0,0};
 			long[][] result = new long[buffer[0].length-1][SHIFT_COUNT];
 			///
@@ -209,7 +209,7 @@ public class SignalsManager {
 			}
 			}
 			///
-			//int[][] savedBuffer=buffer;
+			
 			for (int l=1;l<buffer[0].length;l++)
 			{
 			delays[l-1]=0;	
@@ -217,9 +217,13 @@ public class SignalsManager {
 			long maxValue = 0;
 			long summ=0;
 			for (int k=0;k<SHIFT_COUNT;k++)	{
+				
 				summ=0;
 				delays[l]=k;
+
 				buffer=shiftBuffer(delays);
+				
+				
 				long[] SM = new long [buffer.length];
 				for (int i=0;i<SM.length;i++)
 					SM[i]=1;
@@ -239,7 +243,9 @@ public class SignalsManager {
 			result[l-1][k]=summ;
 									}
 			double L =  SignalsManager.getDistance(Mn.get(0).x,Mn.get(0).y,Mn.get(1).x,Mn.get(1).y);
-			System.out.println("maxIndex:"+maxIndex +"cos:"+V*maxIndex/(Sn.get(0).F*L)+   " Alpha:"+Math.toDegrees(Math.acos(V*maxIndex/(L*Sn.get(0).F))));
+			double cosA = V*maxIndex/(L*Sn.get(0).F);
+			double arcCosA = Math.acos(cosA);
+			System.out.println("maxIndex:"+maxIndex +"cos:"+V*maxIndex/(Sn.get(0).F*L)+   " Alpha:"+Math.toDegrees(arcCosA));
 			
 			//buffer=savedBuffer;
 			
@@ -271,14 +277,23 @@ public class SignalsManager {
 		}
 	public void fillBuffer(int[][] source,int from,int capacity)
 	{
-		if (buffer!=null)
+		/*if (buffer!=null)  	//Треба перевірити чи буде робити по іншому, тому закоментував
 		{
 			previousBuffer = (int[][])buffer.clone();
 		for (int i = 0; i < buffer.length; i++) {
 			previousBuffer[i] = buffer[i].clone();
 		}
-		}
+		}*/
 		buffer = new int[capacity][source[0].length];
+		for (int i=0;i<capacity;i++)
+		{
+			if (i+from<source.length)
+			buffer[i]=source[i+from];
+		}
+	}
+	public void fillPreviousBuffer(int[][] source,int from,int capacity)
+	{
+		previousBuffer = new int[capacity][source[0].length];
 		for (int i=0;i<capacity;i++)
 		{
 			if (i+from<source.length)
@@ -317,7 +332,7 @@ class SoundEmiter{
 		for (int j=0;j<signal.length;j++)
 		for (int i=0;i<Mn.size();i++)
 				SMn[j][i]=SMnTemp[i][j];
-		
+		System.out.println("test");
 	return SMn;
 	}
 	public int[] processEmiterArr(double timeRange,int samplingRate,int F)

@@ -126,7 +126,7 @@ public class Main extends Application {
 				dataInputCounter++;
 				fillScatterChartData();
 				//Тест
-				/*sm.Sn.get(0).setSignal(sm.Sn.get(0).processEmiterArr(TIME_X,SAMPLING_RATE));
+				/*sm.Sn.get(0).setSignal(sm.Sn.get(0).processEmiterArr(TIME_X,SAMPLING_RATE,sm.Sn.get(0).F));
 				int[] SMn = sm.Sn.get(0).signal;
 				double t=TIME_X/SAMPLING_RATE;
 				controller.getSignalsChart().getData().clear();
@@ -392,6 +392,7 @@ public void fillScatterChartData(){
 				System.out.println("Logic:"+SMn.length);
 				for (int i=0;i<SMn.length/sm.BUFFER_CAPACITY;i++)
 				{
+				  if(i>0)sm.fillPreviousBuffer(SMn,(i-1)*sm.BUFFER_CAPACITY,sm.BUFFER_CAPACITY);
 				  sm.fillBuffer(SMn,i*sm.BUFFER_CAPACITY,sm.BUFFER_CAPACITY);		 
 				  shiftIndexesWithMaxSMvalue = sm.interCorelationFunc(sm.buffer);
 				  runAndWait(showingRunnable);
