@@ -229,7 +229,7 @@ public class SignalsManager {
 					SM[i]=1;
 			for (int i=0;i<buffer.length;i++)	
 			{
-				for (int j=0;j<buffer[0].length;j++){
+				for (int j=0;j<buffer[i].length;j++){
 					SM[i]*=buffer[i][j];
 				}
 				summ+=SM[i];
@@ -298,6 +298,7 @@ public class SignalsManager {
 		{
 			if (i+from<source.length)
 			buffer[i]=source[i+from];
+			else Arrays.fill(buffer[i],0);
 		}
 	}
 }
@@ -337,7 +338,7 @@ class SoundEmiter{
 	}
 	public int[] processEmiterArr(double timeRange,int samplingRate,int F)
 	{
-		int[] signalValues = new int[(int) (samplingRate*timeRange)];
+		int[] signalValues = new int[(int) (samplingRate*timeRange+0.5)];
 		double step = 1.0/samplingRate; 
 		double t=0;
 		for (int l=0;l<signalValues.length;l++)
