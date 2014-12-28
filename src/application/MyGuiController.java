@@ -17,10 +17,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 
 public class MyGuiController implements Initializable{
-	@FXML
-	private AnchorPane mapAnchorPane;
 	@FXML
 	private NumberAxis signalsChartXAxis;
 	@FXML
@@ -61,14 +60,22 @@ public class MyGuiController implements Initializable{
 	private TextField textfield_minChartY;
 	@FXML
 	private TextField textfield_errorValue;
+	@FXML
+	private Text text_debugInfo;
+	@FXML
+	private TextArea textarea_debug; 
 	
+	public TextArea getTextarea_debug() {
+		return textarea_debug;
+	}
+
+	public Text getText_debugInfo() {
+		return text_debugInfo;
+	}
+
 	public Button getButton_interCorelation() {
 		return button_interCorelation;
 	}
-	
-	public AnchorPane getMapAnchorPane() {
-		return mapAnchorPane;
-	}	
 
 	public Button getButton_updateChart() {
 		return button_updateChart;

@@ -6,8 +6,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
+import java.util.concurrent.SynchronousQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.sql.rowset.spi.SyncResolver;
+
+import application.Main.CorelationAngle;
 /**
  * Клас дозволяє досліджувати накладання сигналів
  * Відстань - метри, час - секунди
@@ -31,8 +36,8 @@ public class SignalsManager {
 		rand = new Random();
 		this.errorValueUpperLimit = errorValueUpperLimit;
 	}
-	public static int generateSignal(double t,double A,int F){
-		int signal = (int) (A * Math.sin(2.0*Math.PI*F*t)*(double)MAX_SHORT);
+	public static int generateSignal(int t,double A,int F,int samplingRate){
+		int signal = (int) (A * Math.sin(2.0*Math.PI*t*F/samplingRate)*(double)MAX_SHORT+0.5);
 		return signal;
 	}
 	
@@ -195,7 +200,7 @@ public class SignalsManager {
 		return result;
 				
 	}
-	 public long[][]  interCorelationFunc(int[][] buffer){
+	 public long[][]  interCorelationFunc(int[][] buffer,CorelationAngle corelationAngle){
 		 final int SHIFT_COUNT = 48;
 			int[] delays = new int[]{0,0,0,0};
 			long[][] result = new long[buffer[0].length-1][SHIFT_COUNT];
@@ -243,9 +248,13 @@ public class SignalsManager {
 			result[l-1][k]=summ;
 									}
 			double L =  SignalsManager.getDistance(Mn.get(0).x,Mn.get(0).y,Mn.get(1).x,Mn.get(1).y);
-			double cosA = V*maxIndex/(L*Sn.get(0).F);
+			double cosA = V*maxIndex/(L*Sn.get(0).samplingRate);
 			double arcCosA = Math.acos(cosA);
-			System.out.println("maxIndex:"+maxIndex +"cos:"+V*maxIndex/(Sn.get(0).F*L)+   " Alpha:"+Math.toDegrees(arcCosA));
+			synchronized(this) {
+				corelationAngle.setAngle(Math.toDegrees(arcCosA));
+				}
+			
+			System.out.println("maxIndex:"+maxIndex +"cos:"+cosA+   " Alpha:"+Math.toDegrees(arcCosA));
 			
 			//buffer=savedBuffer;
 			
@@ -305,15 +314,15 @@ public class SignalsManager {
 
 
 class SoundEmiter{
-	public SoundEmiter(double x,double y,double A,int F)
+	public SoundEmiter(double x,double y,double A,int samplingRate)
 	{
 		this.x=x;
 		this.y=y;
 		this.A=A;
-		this.F=F;
+		this.samplingRate=samplingRate;
 	}
 	double x, y,A;
-	int F;
+	int samplingRate;
 	int[] signal;
 	public void setSignal(int[] signal){
 		this.signal=signal;
@@ -325,7 +334,7 @@ class SoundEmiter{
 		int k[] = new int[Mn.size()];
 		for (int i=0;i<Mn.size();i++)
 		{
-			k[i]=(int) (SignalsManager.getDistance(x, y, Mn.get(i).x, Mn.get(i).y)*F/SignalsManager.V);
+			k[i]=(int) (SignalsManager.getDistance(x, y, Mn.get(i).x, Mn.get(i).y)*samplingRate/SignalsManager.V);
 			System.out.println("k:"+k[i]);
 		}
 		for (int i=0;i<Mn.size();i++)
@@ -338,13 +347,13 @@ class SoundEmiter{
 	}
 	public int[] processEmiterArr(double timeRange,int samplingRate,int F)
 	{
-		int[] signalValues = new int[(int) (samplingRate*timeRange+0.5)];
-		double step = 1.0/samplingRate; 
-		double t=0;
+		int[] signalValues = new int[(int) (samplingRate*timeRange)];
+	//	double step = 1.0/samplingRate; 
+	//	double t=0;
 		for (int l=0;l<signalValues.length;l++)
 		{
-			signalValues[l]=SignalsManager.generateSignal(t, A,F);
-			t+= step;
+			signalValues[l]=SignalsManager.generateSignal(l, A,F,samplingRate);
+			//t+= step;
 		}
 		return signalValues;
 	}

@@ -36,7 +36,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 	
-	final int SAMPLING_RATE = 48000;
+	//final int SAMPLING_RATE = 48000;
 	double TIME_X = 20.83; //1 секунда
 	FXMLLoader loader;
 	boolean isCorelation=false;
@@ -59,7 +59,6 @@ public class Main extends Application {
 	        //Заповнення серії інформацією
 	       // series.getData().add(new XYChart.Data("2", 14)); 
 		initButtons();
-		initScatterChart();
 			
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -100,8 +99,9 @@ public class Main extends Application {
 		controller.getButton_interCorelation().setOnAction(new EventHandler<ActionEvent>(){
 
 			@Override
-			public void handle(ActionEvent event) {	
-				sm.Sn.get(0).setSignal(sm.Sn.get(0).processEmiterArr(TIME_X,SAMPLING_RATE,sm.Sn.get(0).F));
+			public void handle(ActionEvent event) {
+				controller.getTextarea_debug().setText("");
+				sm.Sn.get(0).setSignal(sm.Sn.get(0).processEmiterArr(TIME_X,sm.Sn.get(0).samplingRate,1000));
 				int[][] SMn = sm.Sn.get(0).getSMnArr(sm.Mn);
 				showCorelationDependencyOfN(SMn);
 			}
@@ -124,7 +124,6 @@ public class Main extends Application {
 				sm.addSoundEmiterFromString(inputText);
 				sm.addMicrophoneFromString(inputText);
 				dataInputCounter++;
-				fillScatterChartData();
 				//Тест
 				/*sm.Sn.get(0).setSignal(sm.Sn.get(0).processEmiterArr(TIME_X,SAMPLING_RATE,sm.Sn.get(0).F));
 				int[] SMn = sm.Sn.get(0).signal;
@@ -234,66 +233,7 @@ public class Main extends Application {
 	
 		 }
 	}
-	/**
-	 * Ініціалізація карти розміщення мікрофонів та джерел звуку
-	 */
-	public void initScatterChart(){
-	final NumberAxis xAxis = new NumberAxis(-5,5, 1);
-    final NumberAxis yAxis = new NumberAxis(-5,5,1);        
-   //xAxis.setAutoRanging(true);
-   // yAxis.setAutoRanging(true);
-    xAxis.setLabel("X");                
-    yAxis.setLabel("Y");
-    sc = new ScatterChart<Number,Number>(xAxis,yAxis);
-    //sc.prefHeight(100);
-   // sc.prefWidth(100);
-    sc.setTitle("Карта");
-
-    controller.getMapAnchorPane().getChildren().addAll(sc);
-}
-	/**
-	 * Оновлення і вивід інформації про розміщення мікрофонів і джерел звуку
-	 */
-public void fillScatterChartData(){
-	sc.getData().clear();
-	 XYChart.Series series1 = new XYChart.Series();
-	    series1.setName("Мікрофони");
-	    double minCoord=100000;
-	    double maxCoord=-100000;
-	    for (Microphone microphone : sm.Mn)
-	    {
-	    	if (microphone.x>maxCoord) maxCoord=microphone.x;
-	    	else if (microphone.x<minCoord)minCoord=microphone.x;
-	    	if (microphone.y>maxCoord) maxCoord=microphone.y;
-	    	else if (microphone.y<minCoord)minCoord=microphone.y;
-	    series1.getData().add(new XYChart.Data(microphone.x, microphone.y));
-	    }
-	    XYChart.Series series2 = new XYChart.Series();
-	    series2.setName("Джерела звуку");
-	    for (SoundEmiter emiter : sm.Sn)
-	    {
-	    	if (emiter.x>maxCoord) maxCoord=emiter.x;
-	    	else if (emiter.x<minCoord)minCoord=emiter.x;
-	    	if (emiter.y>maxCoord) maxCoord=emiter.y;
-	    	else if (emiter.y<minCoord)minCoord=emiter.y;
-	    series2.getData().add(new XYChart.Data(emiter.x, emiter.y));
-	    }
-	    NumberAxis x=(NumberAxis) sc.getXAxis();
-	    NumberAxis y=(NumberAxis) sc.getYAxis();
-	    //upper 
-	    x.setUpperBound(maxCoord);
-	    y.setUpperBound(maxCoord);
-	    //down
-	    x.setLowerBound(minCoord);
-	    y.setLowerBound(minCoord);
-	    //sm.processCenter();//Центр платформи з мікрофонами
-		//
-	    XYChart.Series series3 = new XYChart.Series();
-	    series3.setName("Центр мікрофонів");
-	    series3.getData().add(new XYChart.Data(sm.getCenterOfMicPane()[0], sm.getCenterOfMicPane()[1]));
-	    sc.getData().addAll(series1, series2,series3);
-	  //  sc.autosize();
-}
+	
 
 	public void checkSettings()
 	{
@@ -341,26 +281,21 @@ public void fillScatterChartData(){
 		
 	
 	}
-	
-
-	public void showSM_Unused(int[][] SMn){
-		
-		checkSettings();
-		if (SMn==null)return;
-		controller.getSignalsChart().getData().clear();
-		XYChart.Series<Number,Number> serie= new XYChart.Series<Number, Number>();
-		long[] SM = SignalsManager.toSM(SMn,isCorelation);
-		double step = TIME_X/SAMPLING_RATE;
-		ArrayList<XYChart.Data<Number,Number>> data= new ArrayList<XYChart.Data<Number,Number>>(SAMPLING_RATE);
-		double time=0;
-		for (int l =0; l<SM.length;l++){
-			 time = step*l;
-			data.add(new XYChart.Data<Number,Number>((double)time,(long)SM[l]));
+	class CorelationAngle{
+		volatile private Double angle=0.0;
+		public void setAngle(Double newAngle){
+			angle=newAngle;
 		}
-		 serie.getData().addAll(data);
-		 controller.getSignalsChart().getData().add(serie);
+		public Double getAngle(){
+			return angle;
+		}
 	}
-	long[][] shiftIndexesWithMaxSMvalue = null;
+
+	
+	volatile long[][] shiftIndexesWithMaxSMvalue = null;
+
+	 volatile int currentScreen=0;
+	CorelationAngle corelationAngle = new CorelationAngle();
 	public void showCorelationDependencyOfN(int[][] SMn)
 	{
 		checkSettings();
@@ -377,6 +312,8 @@ public void fillScatterChartData(){
 				series.get(i).getData().add(new XYChart.Data<Number,Number>(j,shiftIndexesWithMaxSMvalue[i][j]));
 				controller.getSignalsChart().getData().add(series.get(i));
 			}
+			controller.getText_debugInfo().setText("Екран №:"+currentScreen);
+			controller.getTextarea_debug().appendText("Екран:"+currentScreen+" Кут:"+corelationAngle.getAngle()+"\n");
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -394,7 +331,8 @@ public void fillScatterChartData(){
 				{
 				  if(i>0)sm.fillPreviousBuffer(SMn,(i-1)*sm.BUFFER_CAPACITY,sm.BUFFER_CAPACITY);
 				  sm.fillBuffer(SMn,i*sm.BUFFER_CAPACITY,sm.BUFFER_CAPACITY);		 
-				  shiftIndexesWithMaxSMvalue = sm.interCorelationFunc(sm.buffer);
+				  shiftIndexesWithMaxSMvalue = sm.interCorelationFunc(sm.buffer,corelationAngle);
+				  currentScreen=i;
 				  runAndWait(showingRunnable);
 				}
 				  return null;

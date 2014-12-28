@@ -13,69 +13,73 @@
 
 <AnchorPane fx:id="rootLayout" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.MyGuiController">
    <children>
-      <MenuBar fx:id="menuBar" prefHeight="29.0" prefWidth="255.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
-        <menus>
-          <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem fx:id="open" mnemonicParsing="false" text="Open" />
-                  <MenuItem fx:id="process" mnemonicParsing="false" text="Process" />
-                  <MenuItem fx:id="undo" mnemonicParsing="false" text="Undo" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
-      <VBox fx:id="mainVBox" alignment="CENTER" layoutY="29.0" prefHeight="454.0" prefWidth="640.0" AnchorPane.bottomAnchor="-3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="29.0">
+      <VBox fx:id="mainVBox" alignment="TOP_CENTER" layoutY="29.0" AnchorPane.bottomAnchor="-3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="29.0">
          <children>
-            <LineChart fx:id="signalsChart" animated="false" createSymbols="false">
-              <xAxis>
-                <NumberAxis fx:id="signalsChartXAxis" animated="false" side="BOTTOM" upperBound="10.0" />
-              </xAxis>
-              <yAxis>
-                <NumberAxis fx:id="signalsChartYAxis" animated="false" lowerBound="-5.0" side="LEFT" upperBound="5.0" />
-              </yAxis>
-            </LineChart>
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+            <Text fx:id="text_debugInfo" strokeType="OUTSIDE" strokeWidth="0.0" text="DebugInfo" />
+            <ScrollPane fitToWidth="true" prefHeight="1200.0">
+               <content>
+                  <LineChart fx:id="signalsChart" animated="false" createSymbols="false">
+                    <xAxis>
+                      <NumberAxis fx:id="signalsChartXAxis" animated="false" side="BOTTOM" upperBound="10.0" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis fx:id="signalsChartYAxis" animated="false" lowerBound="-5.0" side="LEFT" upperBound="5.0" />
+                    </yAxis>
+                  </LineChart>
+               </content>
+            </ScrollPane>
+            <HBox>
                <children>
-                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Min" />
-                  <TextField fx:id="textfield_minChartX" />
-                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Max" />
-                  <TextField fx:id="textfield_maxChartX" />
-                  <CheckBox fx:id="checkbox_chartAutorangingX" mnemonicParsing="false" text="Автограниця" />
-               </children>
-            </HBox>
-            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Min" />
-                  <TextField fx:id="textfield_minChartY" />
-                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Max" />
-                  <TextField fx:id="textfield_maxChartY" />
-                  <CheckBox fx:id="checkbox_chartAutorangingY" mnemonicParsing="false" text="Автограниця" />
-               </children>
-            </HBox>
-            <HBox alignment="CENTER">
-               <children>
-                  <TextArea fx:id="textarea_input" text="З(X:0;y:1.0;A:1.0;F:340)&#10;М(X:-0.3;y:0)&#10;М(X:0.3;y:0)&#10;М(X:-0.6;y:0)&#10;М(X:0.6;y:0)" />
-                  <TextArea fx:id="textarea_output" />
-               </children>
-            </HBox>
-            <HBox prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <Label text="Введена похибка" />
-                  <TextField fx:id="textfield_errorValue" />
-               </children>
-            </HBox>
-            <VBox fx:id="slidersVBox" prefHeight="200.0" prefWidth="100.0" />
-            <HBox prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <Button fx:id="button_dataInput" mnemonicParsing="false" text="Ввести дані" />
-                  <Button fx:id="button_process" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="Обрахунки" />
-                  <Button fx:id="button_showMaximums" mnemonicParsing="false" text="Графік максимумів" />
-               </children>
-            </HBox>
-            <HBox prefHeight="100.0" prefWidth="200.0">
-               <children>
-                  <Button fx:id="button_addSoundEmiterControls" mnemonicParsing="false" text="Контролер звуків" />
-                  <Button fx:id="button_updateChart" mnemonicParsing="false" text="Оновити графік" />
+                  <VBox>
+                     <children>
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Min" />
+                              <TextField fx:id="textfield_minChartX" text="0.1" />
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Max" />
+                              <TextField fx:id="textfield_maxChartX" text="0.12" />
+                              <CheckBox fx:id="checkbox_chartAutorangingX" mnemonicParsing="false" text="Автограниця" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Min" />
+                              <TextField fx:id="textfield_minChartY" />
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Max" />
+                              <TextField fx:id="textfield_maxChartY" />
+                              <CheckBox fx:id="checkbox_chartAutorangingY" mnemonicParsing="false" text="Автограниця" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER" minHeight="100.0">
+                           <children>
+                              <TextArea fx:id="textarea_input" text="З(X:0;y:100;A:1.0;F:340)&#10;М(X:-15;y:0)&#10;М(X:15;y:0)" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <CheckBox fx:id="checkbox_isCorelation" mnemonicParsing="false" text="Кореляція" />
+                           </children>
+                        </HBox>
+                        <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Label text="Введена похибка" />
+                              <TextField fx:id="textfield_errorValue" prefHeight="25.0" prefWidth="67.0" />
+                              <Label text="Затримки" />
+                              <TextArea fx:id="textarea_delays" prefHeight="25.0" prefWidth="208.0" text="-1,1,-2,2" />
+                           </children>
+                        </HBox>
+                        <VBox fx:id="slidersVBox" prefHeight="20.0" prefWidth="625.0" />
+                        <HBox alignment="TOP_CENTER">
+                           <children>
+                              <Button fx:id="button_dataInput" mnemonicParsing="false" text="Ввести дані" />
+                              <Button fx:id="button_processSinusoid" mnemonicParsing="false" prefHeight="25.0" prefWidth="102.0" text="Обрахунки" />
+                              <Button fx:id="button_updateChart" mnemonicParsing="false" text="Оновити графік" />
+                              <Button fx:id="button_interCorelation" mnemonicParsing="false" text="Взаємокореляція" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+                  <TextArea fx:id="textarea_debug" />
                </children>
             </HBox>
          </children>

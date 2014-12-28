@@ -1,10 +1,18 @@
 package application;
 
+import java.awt.Point;
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Random;
+import java.util.concurrent.SynchronousQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.sql.rowset.spi.SyncResolver;
+
+import application.Main.CorelationAngle;
 /**
  * Клас дозволяє досліджувати накладання сигналів
  * Відстань - метри, час - секунди
@@ -12,12 +20,14 @@ import java.util.regex.Pattern;
  *
  */
 public class SignalsManager {
-	double V =340;
-	double F=340;
+	final static short MAX_SHORT = 32767;//32767
+	static double V =340;
+	final int BUFFER_CAPACITY = 8000;//8000
 	ArrayList<SoundEmiter> Sn; 
 	ArrayList<Microphone> Mn ;
+	int buffer[][];
+	int previousBuffer[][];
 	double timings[][];
-	double SM=0;
 	double errorValueUpperLimit = 0;
 	Random rand;
 	public SignalsManager(double errorValueUpperLimit){
@@ -26,25 +36,103 @@ public class SignalsManager {
 		rand = new Random();
 		this.errorValueUpperLimit = errorValueUpperLimit;
 	}
+	public static int generateSignal(int t,double A,int F,int samplingRate){
+		int signal = (int) (A * Math.sin(2.0*Math.PI*t*F/samplingRate)*(double)MAX_SHORT+0.5);
+		return signal;
+	}
+	
+	
+	public static int[][] shift(int[][] source,int[] delays)
+	{
+		if (source==null || delays==null) return source;
+		int[][] result = new int[source.length][source[0].length];
+		if (source.length==0 || source[0].length==0)return null;
+		int delayIterator=0;
+		for (int j=0;j<source[0].length;j++)
+		{
+			
+			int delay = 0;
+			if (delayIterator<delays.length)delay=delays[delayIterator++];
+			for (int i=0;i<source.length;i++)
+			{
+				if (i-delay<0 || i-delay>source.length-1) result[i][j]=0;
+				else
+				result[i][j]=source[i-delay][j];
+			}
+		}
+		
+	
+		return result;
+	}
+	
+	public static int[] shift(int[] source,int delay)
+	{
+		if (source==null || delay==0) return source;
+		int[]result = new int[source.length];
+		if (source.length==0)return null;
+		for (int i=0;i<source.length;i++)
+		{	
+				if (i-delay<0 || i-delay>source.length-1) result[i]=0;
+				else
+				result[i]=source[i-delay];
+		}
+		
+	
+		return result;
+	}
+	
+	public int[][] shiftBuffer(int[] delays)
+	{
+		
+		if (buffer==null || delays==null) return null;
+		int[][] result = new int[buffer.length][buffer[0].length];
+		if (buffer.length==0 || buffer[0].length==0)return null;
+		int delayIterator=0;
+		for (int j=0;j<buffer[0].length;j++)
+		{
+			int delay = 0;
+			if (delayIterator<delays.length)delay=delays[delayIterator++];
+			for (int i=0;i<buffer.length;i++)
+			{
+				if (i-delay<0) 
+				{
+					if(previousBuffer!=null)
+					result[i][j]=previousBuffer[previousBuffer.length+(i-delay)][j];
+					else result[i][j]=0;
+				}
+				else
+					result[i][j]=buffer[i-delay][j];
+				if (i-delay>buffer.length-1) result[i][j]=0;
+			}
+		}
+	
+		return result;
+	}
+	
+	public double[] getCenterOfMicPane(){
+		  double startX=Mn.get(0).x;
+			double startY=Mn.get(0).y;
+			double endX=Mn.get(0).x;
+			double endY=Mn.get(0).y;
+			for (Microphone mic : Mn)
+			{
+				if (mic.x<startX)startX=mic.x;
+				if (mic.x>endX)endX=mic.x;
+				if (mic.y<startY)startY=mic.y;
+				if (mic.y>endY)endY=mic.y;
+				
+			}
+			double[] center = new double[2];
+			 center[0] = (endX+startX)/2;
+			 center[1]=(endY+startY)/2;
+			 return center;
+	}
+	
 	/**
 	 * Виконує розрахунок затримок проходження сигналу (t=s/v) від мікрофонів до джерел звуку
 	 * @return Двувимірний масив з затримкою від Мікрофони[i] до Звуки[j]
 	 */
-	public void processTimings()
-	{
-		timings = new double[Mn.size()][Sn.size()];
-		int i=0,j=0;
-		for (Microphone microphone : Mn)
-		{
-			for (SoundEmiter soundEmiter : Sn)
-			{ //Додавання сигналів
-				timings[i][j] = getDistance(soundEmiter.x,soundEmiter.y,microphone.x,microphone.y)/V;
-				j++;
-			}	
-			j=0;
-			i++;
-		}
-	}
+	
 	 public void addSoundEmiterFromString(String testString)
 	{	
 		//String micPattern = new String("^Звук[(]x:\\d+;y:\\d+;A:\\d+[)]$");
@@ -55,18 +143,15 @@ public class SignalsManager {
 		Pattern p = Pattern.compile(micPattern);
 		Matcher m = p.matcher(testString);
 		boolean isCorrect=false;
-		double x=0,y=0,a=0,f=0;
+		double x=0,y,a;
+		int f;
 		while (m.find() )
 		{
 			isCorrect=true;
-			System.out.println(m.group(1));
 			x = Double.parseDouble(m.group(1));
-			System.out.println(m.group(3));
-			y = Double.parseDouble(m.group(3));
-			System.out.println(m.group(5));
+			y = Integer.parseInt(m.group(3));
 			 a = Double.parseDouble(m.group(5));
-			 System.out.println(m.group(7));
-			 f = Double.parseDouble(m.group(7));
+			 f = Integer.parseInt(m.group(7));
 			 Sn.add(new SoundEmiter(x,y,a,f));
 		}
 		if (!isCorrect)System.out.println("Невірні данні");
@@ -87,11 +172,8 @@ public class SignalsManager {
 			double x=0,y=0,d=0;
 			while (m.find() )
 			{
-				System.out.println("Мікрофон");
 				isCorrect=true;
-				System.out.println(m.group(1));
 				x = Double.parseDouble(m.group(1));
-				System.out.println(m.group(3));
 				y = Double.parseDouble(m.group(3));
 				 Mn.add(new Microphone(x,y));
 			}
@@ -99,66 +181,183 @@ public class SignalsManager {
 			//Звук(x:0;y:10;А:10)
 			
 		}
-	public double[] toSM(double[][] SMn){
-		double[] result = new double[SMn.length];
+	 static public long[] toSM(int[][] SMn,boolean isCorelation){
+		 if (SMn==null)return null;
+		long[] result = new long [SMn.length];
+		if (isCorelation)
+		{
+		for (int i=0;i<result.length;i++)
+			result[i]=1;
 		for (int i=0;i<SMn.length;i++)
 			for (int j=0;j<SMn[i].length;j++)
-				result[i]+=SMn[i][j];
+				if (SMn[i][j]!=0)result[i]=result[i]*SMn[i][j];
+		}
+		else
+			for (int i=0;i<SMn.length;i++)
+				for (int j=0;j<SMn[i].length;j++)
+					result[i]=result[i]+SMn[i][j];
+		
 		return result;
 				
 	}
-	
-		public double getSm(double T)
-		{
-			
-		double SM=0;
-		double[] SMn = getSMn(T);
-		for (int k=0;k<SMn.length;k++)
-		SM+=SMn[k];
-		return SM;
-		}
-		public double[] getSMn(double T)
-		{
-			double[] SMn = new double[Mn.size()];;
-			int i=0,j=0;
-		
-		for (Microphone microphone : Mn)
+	 public long[][]  interCorelationFunc(int[][] buffer,CorelationAngle corelationAngle){
+		 final int SHIFT_COUNT = 48;
+			int[] delays = new int[]{0,0,0,0};
+			long[][] result = new long[buffer[0].length-1][SHIFT_COUNT];
+			///
+			int[][] savedBuffer = new int[buffer.length][buffer[0].length];
+			if (buffer!=null)
 			{
-		for (SoundEmiter soundEmiter : Sn)
-				{ //Додавання сигналів
-			double W=2*3.1416 * soundEmiter.F;
-			double dP = W*timings[i][j];
-			int rangeMin=0; //Мінімальне значення похибки
-			double randomValue = rangeMin + (errorValueUpperLimit - rangeMin) * rand.nextDouble();
-			double errorValue = randomValue; //Значеня введеної похибки
-			SMn[i]+=(soundEmiter.A+errorValue)*Math.sin(W*T+dP);
-			j++;
-				}	
-		j=0;
-		i++;
-			}	
+				savedBuffer = (int[][])buffer.clone();
+			for (int i = 0; i < buffer.length; i++) {
+				savedBuffer[i] = buffer[i].clone();
+			}
+			}
+			///
+			
+			for (int l=1;l<buffer[0].length;l++)
+			{
+			delays[l-1]=0;	
+			int maxIndex = 0;
+			long maxValue = 0;
+			long summ=0;
+			for (int k=0;k<SHIFT_COUNT;k++)	{
+				
+				summ=0;
+				delays[l]=k;
 
-		return SMn;
-		}
-		
-	//public double getSMn(int k,int t){}
-	public double getDistance(double x1, double y1,double x2,double y2)
+				buffer=shiftBuffer(delays);
+				
+				
+				long[] SM = new long [buffer.length];
+				for (int i=0;i<SM.length;i++)
+					SM[i]=1;
+			for (int i=0;i<buffer.length;i++)	
+			{
+				for (int j=0;j<buffer[i].length;j++){
+					SM[i]*=buffer[i][j];
+				}
+				summ+=SM[i];
+				//if (summ<0)System.out.println("summ:"+summ);
+			}
+			if (summ>maxValue)	{
+								maxValue=summ;
+								maxIndex=k;
+								}
+			//System.out.println("summ:"+summ);
+			result[l-1][k]=summ;
+									}
+			double L =  SignalsManager.getDistance(Mn.get(0).x,Mn.get(0).y,Mn.get(1).x,Mn.get(1).y);
+			double cosA = V*maxIndex/(L*Sn.get(0).samplingRate);
+			double arcCosA = Math.acos(cosA);
+			synchronized(this) {
+				corelationAngle.setAngle(Math.toDegrees(arcCosA));
+				}
+			
+			System.out.println("maxIndex:"+maxIndex +"cos:"+cosA+   " Alpha:"+Math.toDegrees(arcCosA));
+			
+			//buffer=savedBuffer;
+			
+				buffer = (int[][])savedBuffer.clone();
+			for (int i = 0; i < savedBuffer.length; i++) {
+				buffer[i] = savedBuffer[i].clone();
+			}
+			}
+			return result;
+			}
+	 
+	public static double getDistance(double x1, double y1,double x2,double y2)
 	{
 		double result = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 		return result;
 	}
-	
+	/**
+	 * Знаходження енергії сигналу
+	 * @param buffer
+	 * @return
+	 */
+	public double soundPressureLevel(final float[] buffer) {
+		double power = 0.0D;
+		for (float element : buffer) {
+		power += element * element;
+		}
+		double value = Math.pow(power, 0.5)/ buffer.length;;
+		return 20.0 * Math.log10(value);
+		}
+	public void fillBuffer(int[][] source,int from,int capacity)
+	{
+		/*if (buffer!=null)  	//Треба перевірити чи буде робити по іншому, тому закоментував
+		{
+			previousBuffer = (int[][])buffer.clone();
+		for (int i = 0; i < buffer.length; i++) {
+			previousBuffer[i] = buffer[i].clone();
+		}
+		}*/
+		buffer = new int[capacity][source[0].length];
+		for (int i=0;i<capacity;i++)
+		{
+			if (i+from<source.length)
+			buffer[i]=source[i+from];
+		}
+	}
+	public void fillPreviousBuffer(int[][] source,int from,int capacity)
+	{
+		previousBuffer = new int[capacity][source[0].length];
+		for (int i=0;i<capacity;i++)
+		{
+			if (i+from<source.length)
+			buffer[i]=source[i+from];
+			else Arrays.fill(buffer[i],0);
+		}
+	}
 }
 
+
 class SoundEmiter{
-	public SoundEmiter(double x,double y,double A,double F)
+	public SoundEmiter(double x,double y,double A,int samplingRate)
 	{
 		this.x=x;
 		this.y=y;
 		this.A=A;
-		this.F=F;
+		this.samplingRate=samplingRate;
 	}
-	double x, y,A,F;
+	double x, y,A;
+	int samplingRate;
+	int[] signal;
+	public void setSignal(int[] signal){
+		this.signal=signal;
+	}
+	public int[][] getSMnArr(ArrayList<Microphone> Mn)
+	{
+		int[][] SMnTemp = new int[Mn.size()][signal.length];
+		int[][] SMn = new int[signal.length][Mn.size()];
+		int k[] = new int[Mn.size()];
+		for (int i=0;i<Mn.size();i++)
+		{
+			k[i]=(int) (SignalsManager.getDistance(x, y, Mn.get(i).x, Mn.get(i).y)*samplingRate/SignalsManager.V);
+			System.out.println("k:"+k[i]);
+		}
+		for (int i=0;i<Mn.size();i++)
+		SMnTemp[i]=SignalsManager.shift(signal,k[i]);
+		for (int j=0;j<signal.length;j++)
+		for (int i=0;i<Mn.size();i++)
+				SMn[j][i]=SMnTemp[i][j];
+		System.out.println("test");
+	return SMn;
+	}
+	public int[] processEmiterArr(double timeRange,int samplingRate,int F)
+	{
+		int[] signalValues = new int[(int) (samplingRate*timeRange)];
+	//	double step = 1.0/samplingRate; 
+	//	double t=0;
+		for (int l=0;l<signalValues.length;l++)
+		{
+			signalValues[l]=SignalsManager.generateSignal(l, A,F,samplingRate);
+			//t+= step;
+		}
+		return signalValues;
+	}
+	
 }
 class Microphone{
 	public Microphone(double x,double y)
@@ -167,20 +366,5 @@ class Microphone{
 		this.y=y;
 	}
 	double x,y;
-	public static boolean checkOneLinePosition(ArrayList<Microphone> microphones)
-	{
-		//(x-x1)/(x2-x1)=(y-y1)/(y2-y1)
-		boolean result = true;
-		double x1 = microphones.get(0).x;
-		double y1 = microphones.get(0).y;
-		double x2 = microphones.get(1).x;
-		double y2 = microphones.get(1).y;
-		for (int i=0;i<microphones.size();i++)
-		{
-			double x=microphones.get(i).x;
-			double y=microphones.get(i).y;
-		if((x-x1)/(x2-x1)!=(y-y1)/(y2-y1))result=false;	
-		}
-		return result;
-	}
+	
 }
